@@ -1,0 +1,303 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id                   String                 @id @default(uuid())
+  name                 String
+  account              String?                @unique
+  department           String?
+  roleId               String?
+  role                 Roles?                 @relation(fields: [roleId], references: [id])
+  customerOganizations CustomerOganizations[]
+  projectMembers       ProjectMembers[]
+  tasks                Tasks[]
+  milestones           Milestones[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  deleted              Boolean                @default(false)
+
+  @@map("users")
+}
+
+model Roles {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     Users[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+
+  @@map("roles")
+}
+
+model CustomerOganizations {
+  id              String         @id @default(uuid())
+  name            String
+  address         String?
+  size            String?
+  phoneNumber     String?
+  industry        String?
+  website         String?
+  managerId       String?
+  manager         Users?         @relation(fields: [managerId], references: [id])
+  contactPointsId String?
+  contactPoint    ContactPoints?
+  projects        Projects[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  deleted         Boolean        @default(false)
+
+  @@map("customer_oganizations")
+}
+
+model ContactPoints {
+  id                    String                @id @default(uuid())
+  name                  String
+  email                 String?
+  title                 String?
+  phoneNumber           String?
+  customerOganizationId String?               @unique
+  customerOganization   CustomerOganizations? @relation(fields: [customerOganizationId], references: [id])
+  projects              Projects[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  deleted               Boolean               @default(false)
+
+  @@map("contact_points")
+}
+
+model Projects {
+  id                String                @id @default(uuid())
+  name              String
+  code              String?
+  scope             String?
+  target            String?
+  usecase           String?
+  sharepointLink    String?
+  customerId        String?
+  customer          CustomerOganizations? @relation(fields: [customerId], references: [id])
+  contactPointId    String?
+  contactPoint      ContactPoints?        @relation(fields: [contactPointId], references: [id])
+  productId         String?
+  product           Products?             @relation(fields: [productId], references: [id])
+  projectEvaluation ProjectEvaluations?
+  projectMembers    ProjectMembers[]
+  contract          Contracts[]
+  timeline          Timelines[]
+  milestones        Milestones[]
+  issues            Issues[]
+  activities        Activities[]
+  botLinks          BotLinks[]
+  moms              MOMs[]
+  implementations   Implementations[]
+  tasks             Tasks[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  deleted           Boolean               @default(false)
+
+  @@map("projects")
+}
+
+model ProjectMembers {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Projects @relation(fields: [projectId], references: [id])
+  userId    String
+  user      Users    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deleted   Boolean  @default(false)
+
+  @@unique([projectId, userId])
+  @@index([projectId, userId])
+  @@map("project_members")
+}
+
+model ProjectEvaluations {
+  id                          String   @id @default(uuid())
+  evaluation_link             String?
+  process_score               Float?
+  time_score                  Float?
+  customer_satisfaction_score Float?
+  grade                       String?
+  comment                     String?
+  projectId                   String   @unique
+  project                     Projects @relation(fields: [projectId], references: [id])
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  deleted                     Boolean  @default(false)
+
+  @@map("project_evaluations")
+}
+
+model Contracts {
+  id        String    @id @default(uuid())
+  type      String?
+  url       String?
+  projectId String?
+  project   Projects? @relation(fields: [projectId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deleted   Boolean   @default(false)
+
+  @@map("contracts")
+}
+
+model Products {
+  id        String     @id @default(uuid())
+  name      String
+  code      String?
+  projects  Projects[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deleted   Boolean    @default(false)
+
+  @@map("products")
+}
+
+model Timelines {
+  id             String           @id @default(uuid())
+  url            String?
+  type           String?
+  projectId      String
+  project        Projects         @relation(fields: [projectId], references: [id])
+  timelineStates TimelineStates[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deleted        Boolean          @default(false)
+
+  @@map("timelines")
+}
+
+model TimelineStates {
+  id         String    @id @default(uuid())
+  timeline   Timelines @relation(fields: [timelineId], references: [id])
+  timelineId String
+  type       String?
+  startDate  DateTime?
+  endDate    DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deleted    Boolean   @default(false)
+
+  @@map("timeline_states")
+}
+
+model BotLinks {
+  id        String    @id @default(uuid())
+  type      String?
+  url       String?
+  projectId String?
+  project   Projects? @relation(fields: [projectId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deleted   Boolean   @default(false)
+
+  @@map("bot_links")
+}
+
+model Activities {
+  id             String   @id @default(uuid())
+  value          String?
+  current_status String?
+  next_plan      String?
+  projectId      String
+  project        Projects @relation(fields: [projectId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deleted        Boolean  @default(false)
+
+  @@map("activities")
+}
+
+model MOMs {
+  id           String   @id @default(uuid())
+  content      String?
+  content_link String?
+  projectId    String
+  project      Projects @relation(fields: [projectId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deleted      Boolean  @default(false)
+
+  @@map("moms")
+}
+
+model Implementations {
+  id              String   @id @default(uuid())
+  uat_confirm     Boolean?
+  testcase_report String?
+  testcase_link   String?
+  projectId       String
+  project         Projects @relation(fields: [projectId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deleted         Boolean  @default(false)
+
+  @@map("implementations")
+}
+
+model Tasks {
+  id         String   @id @default(uuid())
+  subject    String
+  status     String?
+  pic_id     String?
+  pic        Users?   @relation(fields: [pic_id], references: [id])
+  project_id String
+  project    Projects @relation(fields: [project_id], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  deleted    Boolean  @default(false)
+
+  @@map("tasks")
+}
+
+model Milestones {
+  id            String    @id @default(uuid())
+  milestoneDate DateTime?
+  subject       String?
+  status        String?
+  description   String?
+  result        String?
+  pic_id        String?
+  pic           Users?    @relation(fields: [pic_id], references: [id])
+  projectId     String
+  project       Projects  @relation(fields: [projectId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deleted       Boolean   @default(false)
+
+  @@map("milestones")
+}
+
+model Issues {
+  id               String    @id @default(uuid())
+  subject          String
+  type             String?
+  impact           String?
+  startDate        DateTime?
+  description      String?
+  rootCause        String?
+  dueDate          DateTime?
+  correctiveAction String?
+  preventiveAction String?
+  criticalLevel    String?
+  status           String?
+  closedDate       DateTime?
+  projectId        String
+  project          Projects  @relation(fields: [projectId], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deleted          Boolean   @default(false)
+
+  @@map("issues")
+}
