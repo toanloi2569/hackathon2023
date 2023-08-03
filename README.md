@@ -1,15 +1,17 @@
 # Dependencies
 
-Install npm=9.5.0 and node=18.15.0
+Install node=18.15.0 and yarn
 ```angular2html=
-npm install -g npm@9.5.0        #npm 9.5.0 
-npm install -g node@18.15.0     #node 18.15.0
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+nvm install 18.15.0
+nvm use 18.15.0
+npm install -g yarn
 ```
 
 # Installation
 
 ```angular2html=
-npm install
+yarn install
 ```
 
 # Migrate Database
