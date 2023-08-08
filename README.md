@@ -14,6 +14,12 @@ npm install -g yarn
 yarn install
 ```
 
+# Run
+
+```angular2html=
+yarn dev
+```
+
 # Migrate Database
 After update prisma schema in `prisma/schema.prisma`, run the following command to migrate database.
 

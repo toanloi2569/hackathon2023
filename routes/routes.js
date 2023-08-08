@@ -1,4 +1,5 @@
-const openai = require('../services/openai.services');
+const openAIServices = require('../services/openai.services');
+const langchainDBServices = require('../services/langchain.db.services');
 
 module.exports = function(app) {
     app.use(function(req, res, next) {
@@ -10,5 +11,8 @@ module.exports = function(app) {
     });
 
     // complete openai
-    app.post('/api/complete', openai.complete);
+    app.post('/api/complete', openAIServices.complete);
+
+    // chat langchain
+    app.post('/api/chat', langchainDBServices.chat);
 }
